@@ -9,10 +9,10 @@ import { Machine } from './components/Machine';
 import { Prizes } from './components/Prizes';
 import { Claw } from './components/Claw';
 import { ControlPanel } from './components/ControlPanel';
-import { OrbitControls } from '@react-three/drei';
-import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
+import { OrbitControls, Environment } from '@react-three/drei';
 import { useGameStore } from './store';
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
+import { EffectComposer, Bloom, Vignette } from '@react-three/postprocessing';
 
 export default function App() {
   const insertCoin = useGameStore(state => state.insertCoin);
@@ -34,37 +34,39 @@ export default function App() {
         <fog attach="fog" args={['#02040a', 10, 30]} />
         
         {/* Lights */}
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={1.5} />
         {/* Main top spotlight (blue/cyan) */}
         <spotLight 
           position={[0, 15, 0]} 
           angle={0.6} 
           penumbra={0.8} 
-          intensity={5} 
+          intensity={8} 
           color="#34EDF3" 
           castShadow 
           shadow-bias={-0.0001}
         />
         {/* Side neon fill lights */}
-        <pointLight position={[-8, 8, 2]} intensity={8} color="#9201CB" distance={20} />
-        <pointLight position={[8, 8, 2]} intensity={8} color="#F715AB" distance={20} />
-        <pointLight position={[0, 2, 8]} intensity={2} color="#0313A6" distance={10} />
+        <pointLight position={[-8, 8, 2]} intensity={12} color="#9201CB" distance={20} />
+        <pointLight position={[8, 8, 2]} intensity={12} color="#F715AB" distance={20} />
+        <pointLight position={[0, 2, 8]} intensity={5} color="#0313A6" distance={10} />
 
         <OrbitControls target={[0, 4, 0]} maxPolarAngle={Math.PI / 2 + 0.1} minDistance={5} maxDistance={20} />
 
-        <Physics gravity={[0, -9.81, 0]}>
-          <Machine />
-          <Prizes />
-        </Physics>
-        
-        <Claw />
-        <ControlPanel />
+        <Suspense fallback={null}>
+          <Environment preset="city" />
+          <Physics gravity={[0, -9.81, 0]}>
+            <Machine />
+            <Prizes />
+          </Physics>
+          
+          <Claw />
+          <ControlPanel />
 
-        {/* Postprocessing for Neon glow */}
-        <EffectComposer>
-          <Bloom luminanceThreshold={0.1} mipmapBlur intensity={2.5} radius={0.8} />
-          <Vignette eskil={false} offset={0.1} darkness={1.3} />
-        </EffectComposer>
+          <EffectComposer>
+            <Bloom luminanceThreshold={0.5} mipmapBlur intensity={2} radius={0.6} />
+            <Vignette eskil={false} offset={0.1} darkness={0.8} />
+          </EffectComposer>
+        </Suspense>
       </Canvas>
 
       {/* HTML Overlay for interactions that are hard in 3D */}

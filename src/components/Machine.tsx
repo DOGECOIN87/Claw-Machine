@@ -32,7 +32,7 @@ const PurpleBalls = () => {
   }, [count, dummy]);
 
   return (
-    <instancedMesh ref={meshRef} args={[null as any, null as any, count]} castShadow receiveShadow>
+    <instancedMesh ref={meshRef} args={[undefined as any, undefined as any, count]} castShadow receiveShadow>
       <sphereGeometry args={[0.3, 16, 16]} />
       <meshPhysicalMaterial 
         color="#9201CB" 
