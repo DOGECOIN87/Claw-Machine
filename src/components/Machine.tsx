@@ -87,7 +87,6 @@ export function Machine() {
       {/* Simplex Sign */}
       <group position={[6, 8, -9]} rotation={[0, 0, 0.1]}>
         <Text
-          font="/fonts/Digital.ttf" // Fallback but good enough
           fontSize={1.5}
           color="#F715AB"
           anchorX="center"

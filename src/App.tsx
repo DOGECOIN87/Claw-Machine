@@ -53,7 +53,6 @@ export default function App() {
         <OrbitControls target={[0, 4, 0]} maxPolarAngle={Math.PI / 2 + 0.1} minDistance={5} maxDistance={20} />
 
         <Suspense fallback={null}>
-          <Environment preset="city" />
           <Physics gravity={[0, -9.81, 0]}>
             <Machine />
             <Prizes />
