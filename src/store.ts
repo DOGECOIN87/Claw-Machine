@@ -13,9 +13,11 @@ interface GameState {
   time: number;
   clawState: ClawState;
   grabbedPrizeId: string | null;
+  joystickInput: { x: number, y: number };
   insertCoin: () => void;
   playGame: () => void;
   setClawState: (state: ClawState) => void;
+  setJoystickInput: (input: { x: number, y: number }) => void;
   grabPrize: (id: string) => void;
   releasePrize: () => void;
   tickTime: () => void;
@@ -26,6 +28,7 @@ export const useGameStore = create<GameState>((set) => ({
   time: 0,
   clawState: 'IDLE',
   grabbedPrizeId: null,
+  joystickInput: { x: 0, y: 0 } as { x: number, y: number },
 
   insertCoin: () => set((state) => ({ credits: state.credits + 1 })),
   playGame: () => set((state) => {
@@ -35,6 +38,7 @@ export const useGameStore = create<GameState>((set) => ({
     return state;
   }),
   setClawState: (clawState) => set({ clawState }),
+  setJoystickInput: (joystickInput) => set({ joystickInput }),
   grabPrize: (id) => set({ grabbedPrizeId: id }),
   releasePrize: () => set({ grabbedPrizeId: null }),
   tickTime: () => set((state) => {

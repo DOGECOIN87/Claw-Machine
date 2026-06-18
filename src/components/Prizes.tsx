@@ -108,14 +108,23 @@ function Prize({ position, id }: { position: [number, number, number], id: strin
 }
 
 export function Prizes() {
-  const prizes = Array.from({ length: 40 }).map((_, i) => ({
-    id: `prize-${i}`,
-    position: [
-      (Math.random() - 0.5) * 16,
-      3 + Math.random() * 8, // raised drop height
-      (Math.random() - 0.5) * 16
-    ] as [number, number, number],
-  }));
+  const prizes = Array.from({ length: 40 }).map((_, i) => {
+    let x = 0, z = 0;
+    // ensure we don't spawn them inside the drop chute (-7.5, 7.5 area)
+    do {
+      x = (Math.random() - 0.5) * 16;
+      z = (Math.random() - 0.5) * 16;
+    } while (x < -4 && z > 4);
+
+    return {
+      id: `prize-${i}`,
+      position: [
+        x,
+        3 + Math.random() * 8, // raised drop height
+        z
+      ] as [number, number, number],
+    };
+  });
 
   return (
     <group>

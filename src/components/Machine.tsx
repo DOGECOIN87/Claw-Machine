@@ -18,15 +18,21 @@ const PurpleBalls = () => {
 
   useEffect(() => {
     if (!meshRef.current) return;
-    for (let i = 0; i < count; i++) {
+    let i = 0;
+    while (i < count) {
         const x = (Math.random() - 0.5) * 19;
         const y = Math.random() * 1.5;
         const z = (Math.random() - 0.5) * 19;
+        
+        // Don't spawn balls inside the drop chute area
+        if (x < -5 && z > 5) continue;
+
         dummy.position.set(x, y, z);
         const scale = 0.8 + Math.random() * 0.4;
         dummy.scale.set(scale, scale, scale);
         dummy.updateMatrix();
         meshRef.current.setMatrixAt(i, dummy.matrix);
+        i++;
     }
     meshRef.current.instanceMatrix.needsUpdate = true;
   }, [count, dummy]);
@@ -70,6 +76,50 @@ export function Machine() {
          </mesh>
          <PurpleBalls />
       </group>
+
+      {/* Drop Chute Area */}
+      <group position={[-7.5, 0, 7.5]}>
+        {/* Chute Visuals */}
+        <mesh position={[0, 2.5, -2.5]}>
+          <boxGeometry args={[5, 4, 0.1]} />
+          <meshPhysicalMaterial color="#fff" transparent opacity={0.3} roughness={0} transmission={0.9} />
+        </mesh>
+        <mesh position={[2.5, 2.5, 0]}>
+          <boxGeometry args={[0.1, 4, 5]} />
+          <meshPhysicalMaterial color="#fff" transparent opacity={0.3} roughness={0} transmission={0.9} />
+        </mesh>
+        
+        {/* Glowing Rim around chute top */}
+        <mesh position={[0, 4.5, -2.5]}>
+          <boxGeometry args={[5, 0.2, 0.2]} />
+          <meshStandardMaterial color="#34EDF3" emissive="#34EDF3" emissiveIntensity={2} />
+        </mesh>
+        <mesh position={[2.5, 4.5, 0]}>
+          <boxGeometry args={[0.2, 0.2, 5]} />
+          <meshStandardMaterial color="#34EDF3" emissive="#34EDF3" emissiveIntensity={2} />
+        </mesh>
+        
+        {/* Glowing Drop Zone Text on the floor of the chute */}
+        <group position={[0, 1.6, 0]} rotation={[-Math.PI/2, 0, 0]}>
+          <mesh>
+            <planeGeometry args={[4.8, 4.8]} />
+            <meshStandardMaterial color="#0b001a" roughness={0.8} />
+          </mesh>
+          <Text
+            position={[0, 0, 0.1]}
+            fontSize={0.6}
+            color="#34EDF3"
+            anchorX="center"
+            anchorY="middle"
+          >
+            DROP
+          </Text>
+        </group>
+      </group>
+
+      {/* Physics walls for the chute so toys stay inside */}
+      <Wall position={[-7.5, 2.5, 5]} args={[5, 5, 0.1]} />
+      <Wall position={[-5, 2.5, 7.5]} args={[0.1, 5, 5]} />
 
       {/* Walls */}
       <Wall position={[0, 5, -10]} args={[20, 20, 1]} /> {/* Back */}

@@ -9,6 +9,7 @@ export function ControlPanel() {
   const time = useGameStore(state => state.time);
   const setClawState = useGameStore(state => state.setClawState);
   const clawState = useGameStore(state => state.clawState);
+  const joystickInput = useGameStore(state => state.joystickInput);
   
   const buttonRef = useRef<THREE.Mesh>(null);
   const joystickRef = useRef<THREE.Group>(null);
@@ -18,6 +19,9 @@ export function ControlPanel() {
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
       if (keys.current.hasOwnProperty(key)) keys.current[key as keyof typeof keys.current] = true;
+      if (key === ' ' && useGameStore.getState().clawState === 'IDLE') {
+        useGameStore.getState().setClawState('DROPPING');
+      }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
@@ -48,10 +52,10 @@ export function ControlPanel() {
       let targetRotZ = 0;
       
       if (clawState === 'IDLE') {
-        if (keys.current.w) targetRotX = -0.5;
-        if (keys.current.s) targetRotX = 0.5;
-        if (keys.current.a) targetRotZ = 0.5;
-        if (keys.current.d) targetRotZ = -0.5;
+        if (keys.current.w || joystickInput.y < -0.1) targetRotX = -0.5;
+        if (keys.current.s || joystickInput.y > 0.1) targetRotX = 0.5;
+        if (keys.current.a || joystickInput.x < -0.1) targetRotZ = 0.5;
+        if (keys.current.d || joystickInput.x > 0.1) targetRotZ = -0.5;
       }
       
       joystickRef.current.rotation.x = THREE.MathUtils.lerp(joystickRef.current.rotation.x, targetRotX, delta * 10);
@@ -60,7 +64,7 @@ export function ControlPanel() {
   });
 
   return (
-    <group position={[0, 2, 7]} rotation={[-Math.PI / 6, 0, 0]}>
+    <group position={[0, 3, 13.5]} rotation={[-Math.PI / 10, 0, 0]}>
       {/* Panel Base */}
       <mesh position={[0, -0.5, 0]} receiveShadow>
         <boxGeometry args={[18, 1, 6]} />
@@ -68,25 +72,34 @@ export function ControlPanel() {
       </mesh>
       
       {/* Panel Top Surface (textured purple) */}
-      <mesh position={[0, 0.01, 0]} receiveShadow>
+      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[17.5, 5.5]} />
         <meshStandardMaterial color="#3a0058" roughness={0.8} />
       </mesh>
 
       {/* Joystick */}
-      <group position={[-5, 0, 0]} ref={joystickRef}>
-        <mesh position={[0, 0.5, 0]}>
-          <cylinderGeometry args={[0.2, 0.4, 1.2]} />
-          <meshStandardMaterial color="#111" metalness={0.8} roughness={0.2} />
+      <group position={[-3.5, 0, 1]}>
+        {/* Joystick Base Dome */}
+        <mesh position={[0, 0, 0]}>
+          <sphereGeometry args={[1.2, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2]} />
+          <meshStandardMaterial color="#111" roughness={0.7} />
         </mesh>
-        <mesh position={[0, 1.3, 0]}>
-          <sphereGeometry args={[0.8, 32, 32]} />
-          <meshPhysicalMaterial color="#9201CB" roughness={0.1} clearcoat={1} />
-        </mesh>
+        
+        {/* Moving part */}
+        <group ref={joystickRef}>
+          <mesh position={[0, 0.8, 0]}>
+            <cylinderGeometry args={[0.2, 0.3, 1.6]} />
+            <meshStandardMaterial color="#aaa" metalness={0.9} roughness={0.2} />
+          </mesh>
+          <mesh position={[0, 1.6, 0]}>
+            <sphereGeometry args={[0.8, 32, 32]} />
+            <meshPhysicalMaterial color="#9201CB" roughness={0.1} clearcoat={1} />
+          </mesh>
+        </group>
       </group>
 
       {/* Digital Display Section */}
-      <group position={[0, 0, 0]}>
+      <group position={[0, 0, -1]}>
         {/* Label above display */}
         <Text
           position={[-0.8, 0.02, -1.2]}
@@ -126,7 +139,7 @@ export function ControlPanel() {
       </group>
 
       {/* CATCH Button */}
-      <group position={[5, 0, 0]} onClick={handleCatch} onPointerEnter={() => document.body.style.cursor = 'pointer'} onPointerLeave={() => document.body.style.cursor = 'default'}>
+      <group position={[3.5, 0, 1]} onClick={handleCatch} onPointerEnter={() => document.body.style.cursor = 'pointer'} onPointerLeave={() => document.body.style.cursor = 'default'}>
         {/* Button Base Ring */}
         <mesh position={[0, 0, 0]}>
           <cylinderGeometry args={[1.8, 1.9, 0.4, 32]} />

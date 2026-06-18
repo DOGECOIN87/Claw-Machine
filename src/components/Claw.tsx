@@ -3,7 +3,7 @@ import { useGameStore, transientGameState } from '../store';
 import { useRef, useEffect } from 'react';
 import * as THREE from 'three';
 
-const MOVEMENT_BOUNDS = { x: 7, z: 7 };
+const MOVEMENT_BOUNDS = { x: 9, z: 9 };
 const DROP_SPEED = 5;
 const MOVE_SPEED = 5;
 const GROUND_Y = 2; // Increased slightly so we don't clip floor
@@ -17,6 +17,7 @@ export function Claw() {
   const prong3Ref = useRef<THREE.Mesh>(null);
   
   const clawState = useGameStore(state => state.clawState);
+  const joystickInput = useGameStore(state => state.joystickInput);
   const setClawState = useGameStore(state => state.setClawState);
   const grabPrize = useGameStore(state => state.grabPrize);
   const releasePrize = useGameStore(state => state.releasePrize);
@@ -53,10 +54,10 @@ export function Claw() {
 
     if (clawState === 'IDLE') {
       // Movement
-      if (keys.current.w) pos.current.z -= MOVE_SPEED * delta;
-      if (keys.current.s) pos.current.z += MOVE_SPEED * delta;
-      if (keys.current.a) pos.current.x -= MOVE_SPEED * delta;
-      if (keys.current.d) pos.current.x += MOVE_SPEED * delta;
+      if (keys.current.w || joystickInput.y < -0.1) pos.current.z -= MOVE_SPEED * delta;
+      if (keys.current.s || joystickInput.y > 0.1) pos.current.z += MOVE_SPEED * delta;
+      if (keys.current.a || joystickInput.x < -0.1) pos.current.x -= MOVE_SPEED * delta;
+      if (keys.current.d || joystickInput.x > 0.1) pos.current.x += MOVE_SPEED * delta;
       
       // Clamp bounds
       pos.current.x = THREE.MathUtils.clamp(pos.current.x, -MOVEMENT_BOUNDS.x, MOVEMENT_BOUNDS.x);
@@ -100,8 +101,8 @@ export function Claw() {
       }
     }
     else if (clawState === 'RETURNING') {
-      // Move back to (0, ROOF_Y, 6) or something for drop zone
-      const target = new THREE.Vector3(0, ROOF_Y, 6);
+      // Move back to chute
+      const target = new THREE.Vector3(-7.5, ROOF_Y, 7.5);
       pos.current.lerp(target, delta * 3);
       if (pos.current.distanceTo(target) < 0.1) {
         setClawState('OPENING');
